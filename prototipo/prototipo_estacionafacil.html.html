@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EstacionaFácil Analytics — Protótipo de Interface</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        /* Estilo customizado para barra de rolagem discreta */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Barra Superior de Controle do Protótipo (Permite alternar facilmente entre as 3 telas para prints/Figma) -->
+    <div class="bg-slate-950 text-slate-300 px-4 py-2.5 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs font-medium">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="text-white font-semibold">PROTOTIPO UI/UX</span>
+                <span class="hidden sm:inline text-slate-500">|</span>
+                <span class="hidden sm:inline text-slate-400">EstacionaFácil Analytics (ADS/SI 2026-2)</span>
+            </div>
+
+            <!-- Seletor Rápido das 3 Telas -->
+            <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800" role="tablist">
+                <button onclick="switchScreen('login')" id="tab-login"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm">
+                    <span>1. Login_Gestor</span>
+                </button>
+                <button onclick="switchScreen('dashboard')" id="tab-dashboard"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
+                    <span>2. Dashboard_Principal</span>
+                </button>
+                <button onclick="switchScreen('config')" id="tab-config"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
+                    <span>3. Configuracoes_Importacao</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast / Mensagem de Feedback (Substitui alert()) -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-3 max-w-md">
+            <div id="toast-icon" class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <div>
+                <p id="toast-title" class="text-sm font-semibold">Ação concluída</p>
+                <p id="toast-message" class="text-xs text-slate-300">Operação realizada com sucesso.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TELA 1: LOGIN_GESTOR                                                  -->
+    <!-- ===================================================================== -->
+    <section id="screen-login" class="flex-1 flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden">
+            <!-- Cabeçalho do Card de Login -->
+            <div class="bg-slate-900 px-8 pt-8 pb-7 text-center border-b border-slate-800">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-white tracking-tight">EstacionaFácil <span class="text-blue-400">Analytics</span></h1>
+                <p class="text-xs text-slate-400 mt-1.5">Inteligência Operacional &amp; Análise de Satisfação (NLP)</p>
+            </div>
+
+            <!-- Formulário de Autenticação -->
+            <form onsubmit="handleLogin(event)" class="p-8 space-y-5">
+                <div>
+                    <label for="login-email" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                        E-mail Corporativo
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </span>
+                        <input id="login-email" type="email" required value="diretoria@estacionafacil.com.br"
+                            class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"
+                            placeholder="nome@estacionafacil.com.br">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="login-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                            Senha
+                        </label>
+                        <a href="javascript:void(0)" onclick="showToast('Recuperação de Acesso', 'Link de redefinição enviado para o e-mail corporativo cadastrado.')" class="text-xs font-medium text-blue-600 hover:text-blue-700">
+                            Esqueceu a senha?
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </span>
+                        <input id="login-password" type="password" required value="••••••••••••"
+                            class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"
+                            placeholder="Digite sua senha">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                        <input type="checkbox" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-600">
+                        <span>Manter sessão conectada</span>
+                    </label>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        LGPD Ativo
+                    </span>
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2">
+                    <span>Acessar Painel</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
+                <p class="text-[11px] text-slate-400">Acesso restrito à Diretoria Operacional • Versão 1.0</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TELA 2: DASHBOARD_PRINCIPAL                                           -->
+    <!-- ===================================================================== -->
+    <section id="screen-dashboard" class="hidden flex-1 flex flex-col">
+        <!-- Navbar do Sistema SaaS -->
+        <header class="bg-slate-900 text-white border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
+                            EF
+                        </div>
+                        <div>
+                            <span class="font-bold text-base tracking-tight block leading-none">EstacionaFácil</span>
+                            <span class="text-[11px] text-blue-400 font-medium">Analytics &amp; NLP</span>
+                        </div>
+                    </div>
+
+                    <nav class="hidden md:flex items-center gap-1">
+                        <button onclick="switchScreen('dashboard')" class="px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-800 text-white">
+                            Painel Gerencial
+                        </button>
+                        <button onclick="switchScreen('config')" class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                            Alertas &amp; Importação
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="switchScreen('config')" class="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition" title="1 Alerta Crítico Ativo">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-slate-900"></span>
+                    </button>
+                    <div class="h-6 w-px bg-slate-700"></div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-semibold">
+                            DO
+                        </div>
+                        <div class="hidden sm:block text-left">
+                            <p class="text-xs font-semibold leading-tight">Diretor Operacional</p>
+                            <p class="text-[11px] text-slate-400">Unidade Centro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal do Dashboard -->
+        <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+            <!-- Cabeçalho + Barra de Filtros (RF07) -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Visão Geral de Satisfação</h2>
+                    <p class="text-xs text-slate-500">Indicadores extraídos automaticamente via Processamento de Linguagem Natural</p>
+                </div>
+
+                <!-- Filtros RF07 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Período</label>
+                        <select id="filter-period" onchange="applyDashboardFilters()" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="30d" selected>Últimos 30 dias</option>
+                            <option value="7d">Últimos 7 dias</option>
+                            <option value="90d">Último trimestre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Tipo de Contrato</label>
+                        <select id="filter-contract" onchange="applyDashboardFilters()" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="todos" selected>Todos os Contratos</option>
+                            <option value="avulso">Avulso</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="mensal">Mensal</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Categoria de Veículo</label>
+                        <select id="filter-vehicle" onchange="applyDashboardFilters()" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="todos" selected>Todos os Veículos</option>
+                            <option value="carro_pequeno">Carro Pequeno</option>
+                            <option value="carro_grande">Carro Grande</option>
+                            <option value="moto">Moto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Vermelho de Alerta Automático (RF06) -->
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-start sm:items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-600 text-white">RF06 • Alerta Automático</span>
+                            <span class="text-xs text-red-700 font-medium">Disparado há 14 minutos</span>
+                        </div>
+                        <p class="text-sm font-semibold text-red-950 mt-1">
+                            Alerta Crítico: Satisfação do serviço <span class="underline">Lava-Jato</span> caiu para <span class="font-bold text-red-700">64%</span>, abaixo do limiar configurado de <span class="font-bold">75%</span>.
+                        </p>
+                    </div>
+                </div>
+                <button onclick="switchScreen('config')" class="shrink-0 px-4 py-2 bg-white hover:bg-red-100 text-red-700 border border-red-300 rounded-xl text-xs font-semibold transition">
+                    Ajustar Limiares
+                </button>
+            </div>
+
+            <!-- 4 Cards de KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Avaliações</span>
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2.5">
+                        <span id="kpi-total" class="text-2xl font-bold text-slate-900">1.420</span>
+                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+12,4%</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Feedbacks anonimizados (LGPD)</p>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Índice Geral de Satisfação</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2.5">
+                        <span id="kpi-satisfaction" class="text-2xl font-bold text-slate-900">82%</span>
+                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Meta: 80%</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Média ponderada dos 8 serviços</p>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Melhor Serviço</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-lg font-bold text-slate-900">Vaga Coberta</span>
+                        <span class="text-lg font-bold text-emerald-600">91%</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Elogios: segurança e proteção climática</p>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-200 bg-red-50/20">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-red-700 uppercase tracking-wider">Serviço Crítico</span>
+                        <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-lg font-bold text-slate-900">Lava-Jato</span>
+                        <span class="text-lg font-bold text-red-600">64%</span>
+                    </div>
+                    <p class="text-[11px] text-red-600 font-medium mt-1.5">11% abaixo do limiar configurado (75%)</p>
+                </div>
+            </div>
+
+            <!-- Grid Central: Gráfico de Barras (8 Serviços) + Gráfico de Rosca (Sentimentos) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Gráfico de Barras Horizontais: 8 Serviços (RF02) -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Índice de Satisfação por Categoria de Serviço (RF02)</h3>
+                            <p class="text-xs text-slate-500">Classificação automática multiclasse com linha de corte mínima em 75%</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] font-medium">
+                            <span class="flex items-center gap-1.5 text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Dentro da meta</span>
+                            <span class="flex items-center gap-1.5 text-red-600"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Abaixo do limiar</span>
+                        </div>
+                    </div>
+
+                    <div id="services-bars-container" class="space-y-3.5">
+                        <!-- Preenchido via JavaScript para permitir atualização dinâmica com os filtros -->
+                    </div>
+                </div>
+
+                <!-- Gráfico de Rosca: Distribuição de Sentimentos (RF03) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Polaridade de Sentimentos (RF03)</h3>
+                        <p class="text-xs text-slate-500">Distribuição semântica dos comentários analisados</p>
+                    </div>
+
+                    <!-- Rosca SVG limpa e nítida (ótima para importação no Figma) -->
+                    <div class="my-6 flex items-center justify-center relative">
+                        <svg class="w-48 h-48 -rotate-90" viewBox="0 0 100 100">
+                            <!-- Fundo -->
+                            <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" stroke-width="14"></circle>
+                            <!-- Positivo: 72% (Circunferência = 2 * pi * 38 = 238.76 -> 72% = 171.9) -->
+                            <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10b981" stroke-width="14"
+                                stroke-dasharray="171.9 238.76" stroke-dashoffset="0"></circle>
+                            <!-- Neutro: 16% (38.2) -->
+                            <circle cx="50" cy="50" r="38" fill="transparent" stroke="#94a3b8" stroke-width="14"
+                                stroke-dasharray="38.2 238.76" stroke-dashoffset="-171.9"></circle>
+                            <!-- Negativo: 12% (28.65) -->
+                            <circle cx="50" cy="50" r="38" fill="transparent" stroke="#ef4444" stroke-width="14"
+                                stroke-dasharray="28.65 238.76" stroke-dashoffset="-210.1"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span class="text-2xl font-bold text-slate-900">72%</span>
+                            <span class="text-[11px] font-medium text-slate-500">Positivos</span>
+                        </div>
+                    </div>
+
+                    <!-- Legenda Detalhada -->
+                    <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="flex items-center gap-2 font-medium text-slate-700">
+                                <span class="w-3 h-3 rounded-sm bg-emerald-500"></span> Positivo
+                            </span>
+                            <span class="font-bold text-slate-900">72% <span class="text-slate-400 font-normal">(1.022)</span></span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="flex items-center gap-2 font-medium text-slate-700">
+                                <span class="w-3 h-3 rounded-sm bg-slate-400"></span> Neutro
+                            </span>
+                            <span class="font-bold text-slate-900">16% <span class="text-slate-400 font-normal">(227)</span></span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="flex items-center gap-2 font-medium text-slate-700">
+                                <span class="w-3 h-3 rounded-sm bg-red-500"></span> Negativo
+                            </span>
+                            <span class="font-bold text-slate-900">12% <span class="text-slate-400 font-normal">(171)</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista Recente de Feedbacks Anonimizados -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Feedbacks Recentes Processados pelo Pipeline NLP</h3>
+                        <p class="text-xs text-slate-500">Identificadores pessoais removidos automaticamente (Conformidade LGPD — RNF03)</p>
+                    </div>
+                    <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Exibindo amostras mais recentes</span>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- Item 1 -->
+                    <div class="p-5 hover:bg-slate-50/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1.5">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold text-slate-700">Cliente #8942</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Lava-Jato</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200">Negativo (Confiança: 96%)</span>
+                                <span class="text-[11px] text-slate-400">• Contrato Avulso • Carro Grande</span>
+                            </div>
+                            <p class="text-sm text-slate-700">"Deixei o SUV para lavagem completa e demorou quase duas horas além do combinado, além de deixarem marcas nos vidros."</p>
+                        </div>
+                        <span class="text-xs text-slate-400 shrink-0">Hoje, 17:42</span>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="p-5 hover:bg-slate-50/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1.5">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold text-slate-700">Cliente #8941</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Vaga Coberta</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Positivo (Confiança: 98%)</span>
+                                <span class="text-[11px] text-slate-400">• Contrato Mensal • Carro Pequeno</span>
+                            </div>
+                            <p class="text-sm text-slate-700">"Excelente estrutura coberta no centro, mesmo com chuva forte meu carro ficou totalmente protegido e o acesso via Pix foi instantâneo."</p>
+                        </div>
+                        <span class="text-xs text-slate-400 shrink-0">Hoje, 16:15</span>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="p-5 hover:bg-slate-50/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1.5">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold text-slate-700">Cliente #8939</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">App / Reserva</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Positivo (Confiança: 94%)</span>
+                                <span class="text-[11px] text-slate-400">• Contrato Semanal • Moto</span>
+                            </div>
+                            <p class="text-sm text-slate-700">"Reservar a vaga de moto antecipadamente pelo aplicativo facilitou muito minha rotina antes de ir para a faculdade."</p>
+                        </div>
+                        <span class="text-xs text-slate-400 shrink-0">Hoje, 14:50</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TELA 3: CONFIGURACOES_IMPORTACAO                                      -->
+    <!-- ===================================================================== -->
+    <section id="screen-config" class="hidden flex-1 flex flex-col">
+        <!-- Navbar do Sistema SaaS -->
+        <header class="bg-slate-900 text-white border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
+                            EF
+                        </div>
+                        <div>
+                            <span class="font-bold text-base tracking-tight block leading-none">EstacionaFácil</span>
+                            <span class="text-[11px] text-blue-400 font-medium">Analytics &amp; NLP</span>
+                        </div>
+                    </div>
+
+                    <nav class="hidden md:flex items-center gap-1">
+                        <button onclick="switchScreen('dashboard')" class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                            Painel Gerencial
+                        </button>
+                        <button onclick="switchScreen('config')" class="px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-800 text-white">
+                            Alertas &amp; Importação
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="switchScreen('dashboard')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                        ← Voltar ao Painel
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-slate-900">Configuração de Alertas e Ingestão de Lotes</h2>
+                <p class="text-xs text-slate-500">Gerencie os limiares mínimos de satisfação (RF05/RF06) e importe arquivos em lote para análise NLP (RF01/RNF05)</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- Coluna Esquerda (7 cols): Tabela de Limiares dos 8 Serviços (RF05) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Limiares de Alerta por Serviço (RF05)</h3>
+                            <p class="text-xs text-slate-500">Dispara notificação automática quando o índice ficar abaixo da meta</p>
+                        </div>
+                        <button onclick="saveThresholds()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Salvar Metas</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="py-3 px-6">Categoria de Serviço</th>
+                                    <th class="py-3 px-4">Índice Atual</th>
+                                    <th class="py-3 px-4">Limiar Mínimo (%)</th>
+                                    <th class="py-3 px-6 text-right">Alerta Ativo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="thresholds-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita (5 cols): Importação de Lote Drag-and-Drop (RF01 / RNF05) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="text-base font-bold text-slate-900">Importar Lote de Avaliações (RF01)</h3>
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">RNF05</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-5">Processe até 1.000 avaliações em menos de 1 minuto no pipeline NLP</p>
+
+                        <!-- Área Drag & Drop -->
+                        <div onclick="simulateBatchUpload()"
+                            class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50/40 rounded-2xl p-8 text-center cursor-pointer transition group">
+                            <div class="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-200 text-blue-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-800">Arraste seu arquivo CSV ou JSON aqui</p>
+                            <p class="text-xs text-slate-500 mt-1">ou clique para selecionar do computador (máx. 1.000 registros)</p>
+                            <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-xs">
+                                <span>Exemplo: lote_avaliacoes_nov2026.csv</span>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Progresso Simulada (RNF05) -->
+                        <div class="mt-5 p-4 rounded-xl bg-slate-900 text-white space-y-2.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-medium text-slate-300 flex items-center gap-2">
+                                    <span id="batch-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    <span id="batch-filename">lote_outubro_1000_registros.csv</span>
+                                </span>
+                                <span id="batch-percent" class="font-bold text-emerald-400">100%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div id="batch-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                <span id="batch-result-text" class="text-emerald-300 font-medium">✓ Processado em 18s — RNF05 atendido (&lt; 60s)</span>
+                                <span>1.000 / 1.000</span>
+                            </div>
+                        </div>
+
+                        <button onclick="simulateBatchUpload()" class="mt-4 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+                            Simular Novo Processamento em Lote (1.000 itens)
+                        </button>
+                    </div>
+
+                    <!-- Card Informativo LGPD / Qualidade -->
+                    <div class="bg-slate-800 text-slate-200 p-5 rounded-2xl border border-slate-700 space-y-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400">Garantia de Qualidade &amp; Privacidade</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Antes da classificação semântica, o pipeline aplica expressões regulares para anonimizar placas de veículos, CPFs e telefones (RNF03).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        // Dados base dos 8 serviços do EstacionaFácil (RF02)
+        const servicesData = [
+            { id: 1, name: 'Vaga Coberta', score: 91, threshold: 75, active: true },
+            { id: 2, name: 'Contrato Mensal', score: 88, threshold: 75, active: true },
+            { id: 3, name: 'Manobrista', score: 85, threshold: 75, active: true },
+            { id: 4, name: 'App / Reserva', score: 84, threshold: 75, active: true },
+            { id: 5, name: 'Vaga Avulsa', score: 81, threshold: 75, active: true },
+            { id: 6, name: 'Pernoite', score: 79, threshold: 75, active: true },
+            { id: 7, name: 'Estética Automotiva', score: 76, threshold: 75, active: true },
+            { id: 8, name: 'Lava-Jato', score: 64, threshold: 75, active: true }
+        ];
+
+        // Alterna entre as 3 telas do protótipo
+        function switchScreen(screenName) {
+            const screens = ['login', 'dashboard', 'config'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                const tab = document.getElementById(`tab-${s}`);
+                if (s === screenName) {
+                    el.classList.remove('hidden');
+                    tab.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+                    tab.classList.remove('text-slate-400', 'hover:text-white');
+                } else {
+                    el.classList.add('hidden');
+                    tab.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+                    tab.classList.add('text-slate-400', 'hover:text-white');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Simula login e direciona para o Dashboard
+        function handleLogin(event) {
+            event.preventDefault();
+            switchScreen('dashboard');
+            showToast('Bem-vindo ao EstacionaFácil Analytics', 'Sessão iniciada como Diretor Operacional.');
+        }
+
+        // Renderiza o gráfico de barras horizontais dos 8 serviços
+        function renderServiceBars(multiplier = 0) {
+            const container = document.getElementById('services-bars-container');
+            container.innerHTML = '';
+
+            servicesData.forEach(service => {
+                // Pequena variação visual quando o usuário altera os filtros do RF07
+                let adjustedScore = Math.min(99, Math.max(55, service.score + multiplier));
+                if (service.name === 'Lava-Jato') adjustedScore = 64; // Mantém o caso crítico em destaque
+
+                const isCritical = adjustedScore < service.threshold;
+                const barColor = isCritical ? 'bg-red-500' : 'bg-emerald-500';
+                const textColor = isCritical ? 'text-red-600 font-bold' : 'text-slate-800 font-semibold';
+
+                const row = `
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-700 flex items-center gap-2">
+                                ${service.name}
+                                ${isCritical ? '<span class="px-1.5 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 rounded">CRÍTICO</span>' : ''}
+                            </span>
+                            <span class="${textColor}">${adjustedScore}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 relative overflow-hidden">
+                            <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${adjustedScore}%"></div>
+                            <!-- Marcador visual do limiar de 75% -->
+                            <div class="absolute top-0 bottom-0 w-0.5 bg-slate-900/40" style="left: ${service.threshold}%" title="Limiar configurado: ${service.threshold}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // Renderiza a tabela de configuração de limiares (Tela 3)
+        function renderThresholdsTable() {
+            const tbody = document.getElementById('thresholds-table-body');
+            tbody.innerHTML = '';
+
+            servicesData.forEach((service, index) => {
+                const isCritical = service.score < service.threshold;
+                const badgeClass = isCritical
+                    ? 'bg-red-50 text-red-700 border-red-200'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+                const tr = `
+                    <tr class="hover:bg-slate-50/70 transition">
+                        <td class="py-3.5 px-6 font-medium text-slate-800">${service.name}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeClass}">
+                                ${service.score}%
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-1.5">
+                                <input type="number" min="10" max="100" value="${service.threshold}"
+                                    onchange="updateThresholdValue(${index}, this.value)"
+                                    class="w-20 px-2.5 py-1.5 text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                <span class="text-xs text-slate-400">%</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-6 text-right">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" ${service.active ? 'checked' : ''} onchange="toggleServiceAlert(${index})" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', tr);
+            });
+        }
+
+        function updateThresholdValue(index, val) {
+            servicesData[index].threshold = Number(val);
+            renderServiceBars();
+            renderThresholdsTable();
+        }
+
+        function toggleServiceAlert(index) {
+            servicesData[index].active = !servicesData[index].active;
+        }
+
+        function saveThresholds() {
+            showToast('Metas Salvas com Sucesso', 'Os novos limiares de alerta automático foram atualizados no banco de dados.');
+        }
+
+        // Atualiza indicadores visualmente ao mexer nos filtros (RF07)
+        function applyDashboardFilters() {
+            const period = document.getElementById('filter-period').value;
+            const contract = document.getElementById('filter-contract').value;
+            const vehicle = document.getElementById('filter-vehicle').value;
+
+            let total = 1420;
+            let offset = 0;
+
+            if (period === '7d') { total = 348; offset += 2; }
+            if (period === '90d') { total = 4190; offset -= 1; }
+            if (contract !== 'todos') { total = Math.round(total * 0.42); offset += 1; }
+            if (vehicle !== 'todos') { total = Math.round(total * 0.38); }
+
+            document.getElementById('kpi-total').textContent = total.toLocaleString('pt-BR');
+            renderServiceBars(offset);
+            showToast('Filtros Aplicados (RF07)', 'Indicadores atualizados conforme período, contrato e veículo selecionados.');
+        }
+
+        // Simula o upload e processamento em lote de 1.000 avaliações (RNF05)
+        function simulateBatchUpload() {
+            const bar = document.getElementById('batch-progress-bar');
+            const percentText = document.getElementById('batch-percent');
+            const resultText = document.getElementById('batch-result-text');
+            const filename = document.getElementById('batch-filename');
+
+            filename.textContent = 'lote_avaliacoes_nov2026.csv';
+            resultText.textContent = 'Processando anonimização LGPD e classificação NLP...';
+            resultText.className = 'text-blue-300 font-medium';
+
+            let progress = 0;
+            bar.style.width = '0%';
+            percentText.textContent = '0%';
+
+            const interval = setInterval(() => {
+                progress += 20;
+                bar.style.width = `${progress}%`;
+                percentText.textContent = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    resultText.textContent = '✓ Processado em 18s — RNF05 atendido (< 60s)';
+                    resultText.className = 'text-emerald-300 font-medium';
+                    showToast('Lote Processado (RNF05)', '1.000 avaliações classificadas em 18 segundos.');
+                }
+            }, 220);
+        }
+
+        // Exibe toast discreto
+        let toastTimeout;
+        function showToast(title, message) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('hidden');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // Inicialização ao carregar a página
+        window.onload = function() {
+            renderServiceBars();
+            renderThresholdsTable();
+        };
+    </script>
+</body>
+</html>
