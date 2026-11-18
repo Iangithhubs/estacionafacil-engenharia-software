@@ -30,7 +30,7 @@ A organização deste repositório segue boas práticas de **Gerenciamento de Co
   * Modelo Entidade-Relacionamento (`DER_EstacionaFacil.mwb` — MySQL Workbench)[cite: 35]
   * Script SQL de criação das tabelas (`schema.sql`)
 * **`/prototipo`** — Prototipação de interfaces[cite: 35]:
-  * Link do Figma: `[Inserir link do protótipo no Figma aqui]`[cite: 35]
+  * Protótipo interativo disponível em: /prototipo/prototipo_estacionafacil.html`[cite: 35]
   * Telas exportadas do painel gerencial e configuração de alertas[cite: 33, 35]
 
 ---
