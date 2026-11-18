@@ -63,14 +63,13 @@ Para garantir a integridade dos entregáveis e a qualidade do projeto, a equipe 
 | Data | Marco / Entregável | Status |
 | :--- | :--- | :---: |
 | **24/08/2026** | Apresentação da proposta inicial pelo Cliente-Professor (v1.0)[cite: 33] | ✅ Concluído |
-| **06/11/2026** | Definição de atributos de qualidade, métricas e gestão de configuração[cite: 35] | 🔄 Em andamento |
-| **20/11/2026** | **1ª Entrega:** Documento de Visão (PDF), Requisitos, Protótipo e Modelagens (UML/DER)[cite: 35] | 🔄 Em andamento |
+| **06/11/2026** | Definição de atributos de qualidade, métricas e gestão de configuração[cite: 35] | ✅ Em andamento |
+| **20/11/2026** | **1ª Entrega:** Documento de Visão (PDF), Requisitos, Protótipo e Modelagens (UML/DER)[cite: 35] | ✅ Em andamento |
 
 ---
 
 ## 👥 Equipe
 
-* **[Seu Nome Completo]** — `[Papel, ex: Requisitos / Documentação / Banco de Dados]`
-* **[Nome do Integrante 2]** — `[Papel, ex: Modelagem UML / Protótipo Figma]`
-* **[Nome do Integrante 3]** — `[Papel, ex: Qualidade / Métricas / GitHub]`
-* **[Nome do Integrante 4]** — `[Papel]`
+* **[Seu Nome Completo]** — `Ian Lucas Monteiro Souto da Silva`
+* **[Nome do Integrante 2]** — `Victor Flores Lima dos Santos`
+* **[Nome do Integrante 3]** — `Miguel Bonvino Correia da Silva`
